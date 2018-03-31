@@ -1,26 +1,19 @@
 from datetime import datetime
 from psycopg2 import sql
 from query_builder.query_builder import QueryBuilder
-from common.helper import parse_order_by
+from common.helper import parse_path, parse_order_by
 
 
-class QueryBuilderRectangle(QueryBuilder):
+class QueryBuilderPolygon(QueryBuilder):
     def build(self, params):
-        query = 'SELECT position, date, name, value FROM data'
+
         where = []
         values = {}
 
-        # 13.404954﻿, 52.520008
-        latmin = params.get('latmin', 52)
-        latmax = params.get('latmax', 53)
-        lonmin = params.get('lonmin', 13)
-        lonmax = params.get('lonmax', 14)
+        polygon = parse_path(params.get('path', None))
 
-        where.append('ST_Contains(ST_MakeEnvelope(%(latmin)s, %(lonmin)s, %(latmax)s, %(lonmax)s, 4326), position)')
-        values['latmin'] = latmin
-        values['latmax'] = latmax
-        values['lonmin'] = lonmin
-        values['lonmax'] = lonmax
+        where.append("ST_Contains(ST_MakePolygon(ST_GeomFromText(%(polygon)s, 4326)), position)")
+        values['polygon'] = polygon
 
         date = params.get('date', None)
         if date:
@@ -56,15 +49,25 @@ class QueryBuilderRectangle(QueryBuilder):
             where.append('{date} < %(end_date)s')
             values['end_date'] = end_date
 
-        limit = params.get("limit", 50)
-        page = params.get("page", 0)
+        limit = params.get("limit") or 50
+        page = params.get("page") or 0
         offset = int(page) * int(limit)
 
         order_by = parse_order_by(params.get("sort"))
 
+        query = 'SELECT position, date, name, value FROM data'
         query = '{} WHERE {} ORDER BY {} LIMIT {} OFFSET {}'.format(query, ' AND '.join(where), order_by, limit, offset)
-        query = sql.SQL(query).format(date=sql.Identifier('date'), param_id=sql.Identifier('param_id'),
-                                      mars_class=sql.Identifier('mars_class'),
-                                      mars_type=sql.Identifier('mars_type'),
-                                      start_date=sql.Identifier('start_date'), end_date=sql.Identifier('end_date'))
-        return query, values
+        query = format_query(query)
+
+        query_count = 'SELECT COUNT(*) FROM data'
+        query_count = '{} WHERE {}'.format(query_count, ' AND '.join(where))
+        query_count = format_query(query_count)
+
+        return query, query_count, values
+
+
+def format_query(query):
+    return sql.SQL(query).format(date=sql.Identifier('date'), param_id=sql.Identifier('param_id'),
+                                 mars_class=sql.Identifier('mars_class'),
+                                 mars_type=sql.Identifier('mars_type'),
+                                 start_date=sql.Identifier('start_date'), end_date=sql.Identifier('end_date'))

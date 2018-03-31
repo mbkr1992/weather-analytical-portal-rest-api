@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_restful import Api
+from model.search_polygon import SearchPolygon
 from model.search_circle import SearchCircle
 from model.search_rectangle import SearchRectangle
 from common.float_converter import FloatConverter
@@ -10,6 +11,9 @@ app.url_map.converters['float'] = FloatConverter
 
 api = Api(app)
 
+
+api.add_resource(SearchPolygon,
+                 '/search')
 
 api.add_resource(SearchCircle,
                  '/search/<float:lat>,<float:lon>/<int:radius>')

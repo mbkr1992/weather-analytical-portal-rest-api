@@ -17,20 +17,20 @@ class SearchRectangle(Resource):
         limit = request.args.get("limit")
         page = request.args.get("page")
 
-        query, value = QueryBuilderFactory.get_type('rectangle').build({
-            latmin: latmin,
-            lonmin: lonmin,
-            latmax: latmax,
-            lonmax: lonmax,
-            date: date,
-            param_id: param_id,
-            mars_class: mars_class,
-            mars_type: mars_type,
-            start_date: start_date,
-            end_date: end_date,
-            limit: limit,
-            page: page,
-        })
+        query, value = QueryBuilderFactory.get_type('rectangle').build(dict(
+            latmin=latmin,
+            lonmin=lonmin,
+            latmax=latmax,
+            lonmax=lonmax,
+            date=date,
+            param_id=param_id,
+            mars_class=mars_class,
+            mars_type=mars_type,
+            start_date=start_date,
+            end_date=end_date,
+            limit=limit,
+            page=page,
+        ))
 
         result = perform_select(query, value)
 

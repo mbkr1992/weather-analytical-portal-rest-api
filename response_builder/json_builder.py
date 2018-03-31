@@ -8,7 +8,6 @@ class JsonBuilder(ResponseBuilder):
 
 
 def to_dict(param):
-
     position, date, name, value = param
     longitude, latitude = position
     return dict(

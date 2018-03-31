@@ -6,8 +6,10 @@ from query_builder.query_builder_factory import QueryBuilderFactory
 from response_builder.response_factory import ResponseFactory
 
 
-class SearchCircle(Resource):
-    def get(self, lat, lon, radius):
+class SearchPolygon(Resource):
+    def get(self):
+
+        path = request.args.get('path')
         date = request.args.get('date')
         param_id = request.args.get("param_id")
         mars_class = request.args.get("mars_class")
@@ -16,11 +18,10 @@ class SearchCircle(Resource):
         end_date = request.args.get("end_date")
         limit = request.args.get("limit")
         page = request.args.get("page")
+        sort = request.args.get("sort")
 
-        query, value = QueryBuilderFactory.get_type('point').build(dict(
-            lat=lat,
-            lon=lon,
-            radius=radius,
+        query, value = QueryBuilderFactory.get_type('polygon').build(dict(
+            path=path,
             date=date,
             param_id=param_id,
             mars_class=mars_class,
@@ -29,6 +30,7 @@ class SearchCircle(Resource):
             end_date=end_date,
             limit=limit,
             page=page,
+            sort=sort
         ))
 
         result = perform_select(query, value)
