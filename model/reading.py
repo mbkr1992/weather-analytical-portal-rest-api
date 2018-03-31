@@ -9,10 +9,6 @@ DBN = 'dbname=portal user=postgres'
 
 
 class Reading(Resource):
-    pass
-
-
-class Readings(Resource):
     def get(self):
         query, data = construct_query()
         items = sample_select(query, data)
