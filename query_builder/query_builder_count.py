@@ -1,10 +1,10 @@
 from datetime import datetime
 from psycopg2 import sql
 from query_builder.query_builder import QueryBuilder
-from common.helper import parse_path, parse_order_by
+from common.helper import parse_path
 
 
-class QueryBuilderPolygon(QueryBuilder):
+class QueryBuilderCount(QueryBuilder):
     def build(self, params):
 
         where = []
@@ -49,14 +49,8 @@ class QueryBuilderPolygon(QueryBuilder):
             where.append('{date} < %(end_date)s')
             values['end_date'] = end_date
 
-        limit = params.get("limit") or 50
-        page = params.get("page") or 0
-        offset = int(page) * int(limit)
-
-        order_by = parse_order_by(params.get("sort"))
-
-        query = 'SELECT position, date, name, value FROM data'
-        query = '{} WHERE {} ORDER BY {} LIMIT {} OFFSET {}'.format(query, ' AND '.join(where), order_by, limit, offset)
+        query = 'SELECT COUNT(*) FROM data'
+        query = '{} WHERE {}'.format(query, ' AND '.join(where))
         query = format_query(query)
 
         return query, values
