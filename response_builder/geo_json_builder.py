@@ -9,7 +9,8 @@ class GeoJsonBuilder(ResponseBuilder):
 
 def to_feature(param):
     geojson_point, date, name, value = param
-    position = Point(geojson_point.coords)
+    latitude, longitude = geojson_point.coords
+    position = Point(longitude, latitude)
     return Feature(geometry=position, properties=dict(
         date=date.isoformat(),
         name=name,

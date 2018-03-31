@@ -1,23 +1,27 @@
-from common.query_builder import QueryBuilder
 from datetime import datetime
+
 from psycopg2 import sql
 
+from query_builder.query_builder import QueryBuilder
 
-class QueryBuilderCircle(QueryBuilder):
+
+class QueryBuilderRectangle(QueryBuilder):
     def build(self, params):
         query = 'SELECT position, date, name, value FROM data'
         where = []
         values = {}
 
         # 13.404954﻿, 52.520008
-        lat = params.get('lat', 50.7827)
-        lon = params.get('lon', 6.0941)
-        radius = (params.get('radius', 1) * 1000)  # 1km
+        latmin = params.get('latmin', 52)
+        latmax = params.get('latmax', 53)
+        lonmin = params.get('lonmin', 13)
+        lonmax = params.get('lonmax', 14)
 
-        where.append('ST_DWithin(position, ST_MakePoint(%(lon)s, %(lat)s)::geography, %(radius)s)')
-        values['lat'] = lat
-        values['lon'] = lon
-        values['radius'] = radius
+        where.append('ST_Contains(ST_MakeEnvelope(%(latmin)s, %(lonmin)s, %(latmax)s, %(lonmax)s, 4326), position)')
+        values['latmin'] = latmin
+        values['latmax'] = latmax
+        values['lonmin'] = lonmin
+        values['lonmax'] = lonmax
 
         date = params.get('date', None)
         if date:
@@ -57,4 +61,3 @@ class QueryBuilderCircle(QueryBuilder):
                                       mars_type=sql.Identifier('mars_type'),
                                       start_date=sql.Identifier('start_date'), end_date=sql.Identifier('end_date'))
         return query, values
-    pass

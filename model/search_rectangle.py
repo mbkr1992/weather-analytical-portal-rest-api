@@ -6,8 +6,8 @@ from query_builder.query_builder_factory import QueryBuilderFactory
 from response_builder.response_factory import ResponseFactory
 
 
-class SearchCircle(Resource):
-    def get(self, lat, lon, radius):
+class SearchRectangle(Resource):
+    def get(self, latmin, latmax, lonmin, lonmax):
         date = request.args.get('date')
         param_id = request.args.get("param_id")
         mars_class = request.args.get("mars_class")
@@ -17,10 +17,11 @@ class SearchCircle(Resource):
         limit = request.args.get("limit")
         page = request.args.get("page")
 
-        query, value = QueryBuilderFactory.get_type('point').build({
-            lat: lat,
-            lon: lon,
-            radius: radius,
+        query, value = QueryBuilderFactory.get_type('rectangle').build({
+            latmin: latmin,
+            lonmin: lonmin,
+            latmax: latmax,
+            lonmax: lonmax,
             date: date,
             param_id: param_id,
             mars_class: mars_class,
@@ -38,4 +39,3 @@ class SearchCircle(Resource):
         response = response_builder.build(result)
 
         return response
-
